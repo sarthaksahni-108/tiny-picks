@@ -807,19 +807,12 @@ async function startReveal() {
     
     await sleep(3000);
 
-    // Show Spider-Man meme
-    fadeIn($('#reveal-meme'));
-
-    // Setup meme faces
-    CONFIG.players.forEach((player, i) => {
-        const memeSlot = $(`#meme-${i + 1}`);
-        memeSlot.innerHTML = `
-            <img src="${player.avatar}" alt="${player.name}">
-            <div class="meme-shirt">${player.name}</div>
-            <div class="meme-cap">${CONFIG.caps[i < 2 ? (i === 0 ? 'mom' : 'dad') : (i === 2 ? 'mom' : 'dad')]}</div>
-            <div class="meme-point">👉</div>
-        `;
-    });
+    // Show "See the Future" button
+    const btnFuture = $('#btn-see-future');
+    btnFuture.classList.remove('hidden');
+    btnFuture.style.opacity = '0';
+    btnFuture.style.transition = 'opacity 0.6s ease';
+    setTimeout(() => btnFuture.style.opacity = '1', 50);
 }
 
 // Photo carousel auto-rotation
@@ -838,6 +831,38 @@ function startCarousel() {
         dots[current].classList.add('active');
     }, 3000);
 }
+
+// Future carousel
+let futureInterval = null;
+function startFutureCarousel() {
+    const slides = $$('#future-track .future-slide');
+    const dots = $$('#future-dots .dot');
+    let current = 0;
+
+    if (futureInterval) clearInterval(futureInterval);
+
+    futureInterval = setInterval(() => {
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (current + 1) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+    }, 3500);
+}
+
+// "See the Future" button
+$('#btn-see-future').addEventListener('click', () => {
+    if (carouselInterval) { clearInterval(carouselInterval); carouselInterval = null; }
+    showScreen('screen-future');
+    startFutureCarousel();
+});
+
+// Back to reveal
+$('#btn-back-reveal').addEventListener('click', () => {
+    if (futureInterval) { clearInterval(futureInterval); futureInterval = null; }
+    showScreen('screen-reveal');
+    startCarousel();
+});
 
 // Replay delivery animation
 $('#btn-replay-delivery').addEventListener('click', () => {
