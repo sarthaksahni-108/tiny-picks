@@ -542,7 +542,6 @@ async function startDeliveryAnimation() {
     const headline = $('#delivery-punchline-headline');
     const sparklesRight = $('#delivery-sparkles-right');
     const sparklesLeft = $('#delivery-sparkles-left');
-    const rightNote = rightDestination.querySelector('.delivery-destination-note');
 
     renderBagItems($('#delivery-bag-boy-items'), buildEmojiBag(getItemsForPlayers(themPlayers)));
     renderBagItems($('#delivery-bag-girl-items'), buildEmojiBag(getItemsForPlayers(usPlayers)));
@@ -687,8 +686,8 @@ async function startDeliveryAnimation() {
     girl.classList.remove('ride-right');
     boy.classList.add('near-fork-left', 'braking');
     girl.classList.add('near-fork-right', 'braking');
-    popNarration('Hold on... GPS is recalculating! 🤔');
-    await sleep(2000);
+    popNarration('Two addresses detected... splitting routes! 🗺️');
+    await sleep(2500);
     if (!isActive()) return;
 
     await triggerFlash(220);
@@ -696,7 +695,7 @@ async function startDeliveryAnimation() {
 
     fadeIn(twist, 220);
     root.classList.add('show-fork');
-    popNarration('Wait... WHAT?!');
+    popNarration('International shipping activated! ✈️');
     await Promise.all([sleep(500), triggerShake()]);
     if (!isActive()) return;
 
@@ -708,15 +707,15 @@ async function startDeliveryAnimation() {
 
     showDestination(leftDestination);
     showDestination(rightDestination);
-    popNarration('Splitting up! One package each way! 📦↔️📦');
+    popNarration('One to USA 🇺🇸 ... One to India 🇮🇳');
     boy.classList.remove('near-fork-left', 'braking');
     girl.classList.remove('near-fork-right', 'braking');
     boy.classList.add('split-left');
     girl.classList.add('split-right');
-    spawnWhoosh('⚡');
-    spawnWhoosh('🌟');
+    spawnWhoosh('✈️');
+    spawnWhoosh('🌍');
 
-    await sleep(3000);
+    await sleep(3500);
     if (!isActive()) return;
 
     boy.classList.remove('split-left');
@@ -724,28 +723,60 @@ async function startDeliveryAnimation() {
     boy.classList.add('arrived-left');
     girl.classList.add('arrived-right');
     sparklesLeft.classList.add('is-bursting');
-    popNarration('Delivered! But wait... something\'s happening... ✨');
+    sparklesRight.classList.add('is-bursting');
+    popNarration('Both packages delivered! 📦✨');
 
     await sleep(2500);
     if (!isActive()) return;
 
+    // Both couples get Mom + Dad caps simultaneously
     await triggerFlash(260);
     if (!isActive()) return;
 
+    const leftCaps = $('#delivery-destination-left-caps');
+    leftCaps.classList.add('transforming');
     usCaps.classList.add('transforming');
-    sparklesRight.classList.add('is-bursting');
+    leftCaps.textContent = `${CONFIG.caps.mom} ${CONFIG.caps.dad}`;
     usCaps.textContent = `${CONFIG.caps.mom} ${CONFIG.caps.dad}`;
-    rightNote.textContent = 'surprise baby route';
-    popNarration('SURPRISE! Maasi + Mausa are now Mom + Dad! 🎉');
+    popNarration('Wait... Mom & Dad caps on BOTH sides?! 🤯');
     await Promise.all([sleep(520), triggerShake()]);
     if (!isActive()) return;
 
-    headline.textContent = 'DOUBLE DELIVERY UNLOCKED';
-    punchlineSub.textContent = `${usPlayers.map(player => player.name).join(' + ')} have their own baby drop on the map too. 🍼`;
-    fadeIn(punchline, 260);
-    popNarration('The real gift was THIS news all along! 💝');
+    await sleep(2500);
+    if (!isActive()) return;
 
-    await sleep(5000);
+    // Rapid-fire splash punchlines
+    const splashes = [
+        { kicker: '🛒', headline: 'BOGO ACTIVATED', sub: 'Ek ke saath ek FREE!' },
+        { kicker: '🍼🍼', headline: 'DOUBLE TROUBLE', sub: 'loading...' },
+        { kicker: '👶', headline: 'Babies hi Babies!', sub: '' },
+        { kicker: '🤯', headline: 'Buy 1 Get 1 Free', sub: 'Offer applied successfully ✅' },
+        { kicker: '💛', headline: '2 for Joy', sub: 'A lifetime supply of happiness.' },
+    ];
+
+    const kicker = $('#delivery-punchline-kicker');
+
+    for (let i = 0; i < splashes.length; i++) {
+        const splash = splashes[i];
+        kicker.textContent = splash.kicker;
+        headline.textContent = splash.headline;
+        punchlineSub.textContent = splash.sub;
+
+        if (i === 0) {
+            fadeIn(punchline, 260);
+        } else {
+            punchline.classList.remove('splash-pop');
+            void punchline.offsetWidth;
+            punchline.classList.add('splash-pop');
+        }
+
+        await triggerShake();
+        if (!isActive()) return;
+        await sleep(2800);
+        if (!isActive()) return;
+    }
+
+    await sleep(1500);
     if (!isActive()) return;
 
     cleanup();
