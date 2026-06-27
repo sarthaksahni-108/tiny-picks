@@ -730,20 +730,25 @@ async function startDeliveryAnimation() {
     await sleep(2500);
     if (!isActive()) return;
 
-    // Both couples get Mom + Dad caps simultaneously
+    // Both couples get Mom + Dad caps — dramatic reveal
+    popNarration('📦 Packages delivered! Unwrapping...');
+    await sleep(2500);
+    if (!isActive()) return;
+
+    // Big flash + caps appear
     await triggerFlash(260);
     if (!isActive()) return;
 
     const leftCaps = $('#delivery-destination-left-caps');
+    leftCaps.innerHTML = `<span class="cap-badge cap-mom">${CONFIG.caps.mom} Mom</span> <span class="cap-badge cap-dad">${CONFIG.caps.dad} Dad</span>`;
+    usCaps.innerHTML = `<span class="cap-badge cap-mom">${CONFIG.caps.mom} Mom</span> <span class="cap-badge cap-dad">${CONFIG.caps.dad} Dad</span>`;
     leftCaps.classList.add('transforming');
     usCaps.classList.add('transforming');
-    leftCaps.textContent = `${CONFIG.caps.mom} ${CONFIG.caps.dad}`;
-    usCaps.textContent = `${CONFIG.caps.mom} ${CONFIG.caps.dad}`;
-    popNarration('Wait... Mom & Dad caps on BOTH sides?! 🤯');
     await Promise.all([sleep(520), triggerShake()]);
     if (!isActive()) return;
 
-    await sleep(2500);
+    popNarration('Wait... 👀 who ELSE just became Mom & Dad?!');
+    await sleep(3000);
     if (!isActive()) return;
 
     // Rapid-fire splash punchlines
