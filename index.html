@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tiny Picks 🎁</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="doodle-bg"></div>
+
+    <!-- SCREEN 0: Welcome -->
+    <div id="screen-welcome" class="screen active">
+        <div class="welcome-content">
+            <div class="welcome-emoji-cycle" id="welcome-emoji-cycle">🍼</div>
+            <h1>Tiny Picks</h1>
+            <p class="welcome-subtitle">The ultimate gift-picking showdown! 🎯</p>
+            <p class="welcome-desc">A tiny human is on the way — let's load up their welcome cart with the best stuff. Each of us picks, no peeking!</p>
+            <button id="btn-start" class="btn-primary">Let's Go! 🎉</button>
+        </div>
+    </div>
+
+    <!-- SCREEN: Lobby (Create or Join Room) -->
+    <div id="screen-lobby" class="screen">
+        <div class="screen-content center-content">
+            <h2>🎮 Let's Play Together!</h2>
+            <p class="lobby-sub">Everyone plays on their own phone</p>
+            
+            <div class="lobby-options">
+                <div class="lobby-card" id="lobby-create">
+                    <div class="lobby-card-emoji">🏠</div>
+                    <h3>Create Room</h3>
+                    <p>You're the host — share the code with others</p>
+                    <button id="btn-create-room" class="btn-primary">Create Room</button>
+                </div>
+                
+                <div class="lobby-divider">or</div>
+                
+                <div class="lobby-card" id="lobby-join">
+                    <div class="lobby-card-emoji">🔗</div>
+                    <h3>Join Room</h3>
+                    <p>Enter the code shared by the host</p>
+                    <input type="text" id="input-room-code" class="room-code-input" placeholder="ABCD" maxlength="4" autocomplete="off" autocapitalize="characters">
+                    <button id="btn-join-room" class="btn-primary">Join</button>
+                </div>
+            </div>
+            
+            <div class="lobby-error hidden" id="lobby-error"></div>
+        </div>
+    </div>
+
+    <!-- SCREEN: Waiting Room (after creating/joining) -->
+    <div id="screen-room-waiting" class="screen">
+        <div class="screen-content center-content">
+            <h2>🎉 Room Ready!</h2>
+            <div class="room-code-display">
+                <p class="room-code-label">Share this code:</p>
+                <div class="room-code-big" id="room-code-display">----</div>
+                <button id="btn-copy-code" class="btn-secondary">Copy Code 📋</button>
+            </div>
+            <div class="room-players-list" id="room-players-list">
+                <!-- Populated by Firebase listener -->
+            </div>
+            <p class="room-waiting-text" id="room-waiting-text">Waiting for players to join...</p>
+            <button id="btn-start-game" class="btn-primary btn-hidden">Everyone's here — Start! 🚀</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 1: Player Select (claim your avatar) -->
+    <div id="screen-players" class="screen">
+        <div class="screen-content center-content">
+            <h2>Pick yourself! 👆</h2>
+            <p class="instruction">Tap your face to claim it</p>
+            <div id="player-grid" class="player-grid">
+                <!-- Populated by JS -->
+            </div>
+            <div class="ready-status hidden" id="ready-status">
+                <p class="ready-text" id="ready-text">Waiting for everyone...</p>
+            </div>
+            <button id="btn-ready" class="btn-primary btn-hidden">I'm Ready! ✋</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: Shopping Phase -->
+    <div id="screen-shop" class="screen">
+        <div class="screen-content">
+            <div class="shop-header">
+                <div class="player-indicator">
+                    <div id="current-player-avatar" class="mini-avatar"></div>
+                    <span id="current-player-name"></span>
+                </div>
+                <div class="timer-display">
+                    <span id="timer">60</span>s
+                </div>
+                <div class="pick-count">
+                    <span id="picks-made">0</span>/5
+                </div>
+            </div>
+            <p class="shop-instruction">Pick 5 gifts for the baby! 🍼</p>
+            <div id="items-grid" class="items-grid">
+                <!-- Populated by JS -->
+            </div>
+            <button id="btn-done-picking" class="btn-primary btn-hidden">Done! ✓</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: Waiting for others -->
+    <div id="screen-waiting" class="screen">
+        <div class="screen-content center-content">
+            <div class="waiting-emoji">⏳</div>
+            <h2>Locked in! 🔒</h2>
+            <p>Waiting for everyone to finish picking...</p>
+            <div id="player-status-list" class="player-status-list">
+                <!-- Populated by JS -->
+            </div>
+            <button id="btn-all-done" class="btn-primary btn-hidden">Everyone's done — Reveal picks! 🎉</button>
+        </div>
+    </div>
+
+    <!-- SCREEN: Cart Reveal — see what everyone picked (live updating) -->
+    <div id="screen-cart-reveal" class="screen">
+        <div class="screen-content center-content">
+            <h2 class="cart-reveal-title">🛒 The Carts Are In!</h2>
+            <p class="cart-reveal-sub" id="cart-reveal-sub">Waiting for everyone to finish shopping...</p>
+            <div id="cart-reveal-grid" class="cart-reveal-grid">
+                <!-- Populated by JS: 4 player cards with their picks, live updating -->
+            </div>
+            <button id="btn-pack-it" class="btn-primary btn-hidden">Pack it up! 📦</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: Packing Animation -->
+    <div id="screen-packing" class="screen">
+        <div class="screen-content center-content">
+            <h2>Packing the gifts... 📦</h2>
+            <p class="packing-sub">Wrapping up everyone's picks!</p>
+            <div id="packing-animation" class="packing-area">
+                <!-- Populated by JS: 4 individual packages -->
+            </div>
+            <button id="btn-ship" class="btn-primary">Ship them! 🚀</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 5: Delivery Animation (The Twist) -->
+<div id="screen-delivery" class="screen">
+    <div class="delivery-universe zone-city" id="delivery-universe">
+        <div class="delivery-sky-glow"></div>
+        <div class="delivery-stars"></div>
+        <div class="delivery-flash" id="delivery-flash"></div>
+        <div class="delivery-zone-label" id="delivery-zone-label">PASTEL CITY</div>
+
+        <div class="delivery-parallax delivery-parallax-far">
+            <div class="delivery-track" id="delivery-far-track"></div>
+        </div>
+        <div class="delivery-parallax delivery-parallax-mid">
+            <div class="delivery-track" id="delivery-mid-track"></div>
+        </div>
+        <div class="delivery-parallax delivery-parallax-near">
+            <div class="delivery-track" id="delivery-near-track"></div>
+        </div>
+
+        <div class="delivery-road-perspective">
+            <div class="delivery-horizon-glow"></div>
+            <div class="delivery-road delivery-road-main">
+                <div class="delivery-road-markers"></div>
+            </div>
+            <div class="delivery-road delivery-road-left">
+                <div class="delivery-road-markers"></div>
+            </div>
+            <div class="delivery-road delivery-road-right">
+                <div class="delivery-road-markers"></div>
+            </div>
+            <div class="delivery-fork-burst" id="delivery-fork-burst">⚡</div>
+        </div>
+
+        <div class="delivery-whoosh-stream" id="delivery-whoosh-stream"></div>
+
+        <div class="delivery-destinations">
+            <div class="delivery-destination delivery-destination-left hidden" id="delivery-destination-left">
+                <div class="delivery-destination-avatars" id="delivery-destination-left-avatars"></div>
+                <div class="delivery-destination-name" id="delivery-destination-left-name"></div>
+                <div class="delivery-destination-caps" id="delivery-destination-left-caps"></div>
+                <div class="delivery-destination-note">original delivery route</div>
+                <div class="delivery-sparkles" id="delivery-sparkles-left"></div>
+            </div>
+            <div class="delivery-destination delivery-destination-right hidden" id="delivery-destination-right">
+                <div class="delivery-destination-avatars" id="delivery-destination-right-avatars"></div>
+                <div class="delivery-destination-name" id="delivery-destination-right-name"></div>
+                <div class="delivery-destination-caps" id="delivery-destination-right-caps"></div>
+                <div class="delivery-destination-note">wait for it...</div>
+                <div class="delivery-sparkles" id="delivery-sparkles-right"></div>
+            </div>
+        </div>
+
+        <div class="delivery-rider-lane">
+            <div class="delivery-rider delivery-rider-boy ride-left" id="delivery-rider-boy">
+                <div class="delivery-rider-shadow"></div>
+                <div class="delivery-rider-scooter">🛵</div>
+                <img src="assets/delivery-boy.png" alt="Delivery boy">
+                <div class="delivery-bag delivery-bag-boy" id="delivery-bag-boy">
+                    <div class="delivery-bag-label">Package 1</div>
+                    <div class="delivery-bag-items" id="delivery-bag-boy-items"></div>
+                </div>
+            </div>
+            <div class="delivery-rider delivery-rider-girl ride-right" id="delivery-rider-girl">
+                <div class="delivery-rider-shadow"></div>
+                <div class="delivery-rider-scooter">🛵</div>
+                <img src="assets/delivery-girl.png" alt="Delivery girl">
+                <div class="delivery-bag delivery-bag-girl" id="delivery-bag-girl">
+                    <div class="delivery-bag-label">Package 2</div>
+                    <div class="delivery-bag-items" id="delivery-bag-girl-items"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="delivery-narration" id="delivery-narration">
+            <div class="delivery-narration-bubble" id="delivery-narration-bubble">Engines on. Gifts loaded. Baby universe ahead.</div>
+        </div>
+
+        <div class="delivery-twist hidden" id="delivery-twist">
+            <div class="delivery-twist-card">
+                <div class="delivery-twist-icon">📍📍</div>
+                <div class="delivery-twist-title">Two addresses?!</div>
+                <div class="delivery-twist-copy">The GPS just discovered a second baby drop.</div>
+            </div>
+        </div>
+
+        <div class="delivery-punchline hidden" id="delivery-punchline">
+            <div class="delivery-punchline-card">
+                <div class="delivery-punchline-kicker">PLOT TWIST</div>
+                <div class="delivery-punchline-headline" id="delivery-punchline-headline">DOUBLE DELIVERY UNLOCKED</div>
+                <div class="delivery-punchline-sub" id="delivery-punchline-sub"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <!-- SCREEN 6: The Reveal -->
+    <div id="screen-reveal" class="screen">
+        <div class="screen-content center-content">
+            <div id="reveal-flash" class="reveal-flash">
+                <h1 class="bogo-text">BOGO ACTIVATED 🛒</h1>
+                <p class="bogo-sub">Ek ke saath ek FREE!</p>
+            </div>
+            <div id="reveal-photos" class="reveal-photos hidden">
+                <div class="photo-carousel" id="photo-carousel">
+                    <div class="carousel-track" id="carousel-track">
+                        <div class="carousel-slide active">
+                            <img src="assets/reveal/expecting-sign.jpeg" alt="We're expecting!">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="assets/reveal/bump.jpeg" alt="Baby bump">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="assets/reveal/surprise-hands.jpeg" alt="Surprise!">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="assets/reveal/ultrasound.jpeg" alt="Ultrasound">
+                        </div>
+                    </div>
+                    <div class="carousel-dots" id="carousel-dots">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+                <p class="reveal-message">Double Trouble 🍼🍼<br><em>Same initials. Same year. Different timezone.</em></p>
+            </div>
+            <div id="reveal-meme" class="reveal-meme hidden">
+                <div class="meme-container">
+                    <div class="meme-figure" id="meme-1"></div>
+                    <div class="meme-figure" id="meme-2"></div>
+                    <div class="meme-figure" id="meme-3"></div>
+                    <div class="meme-figure" id="meme-4"></div>
+                </div>
+                <p class="meme-caption">"Wait... tum bhi?! 🫵"</p>
+            </div>
+            <button class="btn-replay" id="btn-replay-delivery">🔄 Watch the delivery again!</button>
+        </div>
+    </div>
+
+    <!-- Confetti canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/items.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/firebase-sync.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
