@@ -442,6 +442,8 @@ async function startDeliveryAnimation() {
     const root = $('#delivery-universe');
     if (!root) return;
 
+    try {
+
     if (window.__deliveryCleanup) {
         window.__deliveryCleanup();
     }
@@ -782,6 +784,12 @@ async function startDeliveryAnimation() {
     cleanup();
     showScreen('screen-reveal');
     startReveal();
+
+    } catch (err) {
+        console.error('Delivery animation error:', err);
+        const narrationEl = document.getElementById('delivery-narration-bubble');
+        if (narrationEl) narrationEl.textContent = '⚠️ Error: ' + err.message;
+    }
 }
 
 
