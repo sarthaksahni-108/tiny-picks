@@ -1126,16 +1126,18 @@ h1, h2, h3 {
 .delivery-rider-lane {
     z-index: 8;
     pointer-events: none;
+    overflow: visible;
 }
 
 .delivery-rider {
     position: absolute;
     bottom: 12%;
-    width: 35%;
-    max-width: 150px;
-    min-width: 110px;
+    width: 38%;
+    max-width: 160px;
+    min-width: 120px;
     transform-origin: center bottom;
     transition: left 1.6s cubic-bezier(0.22, 1, 0.36, 1), bottom 1.6s cubic-bezier(0.22, 1, 0.36, 1), transform 1.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    overflow: visible;
 }
 
 .delivery-rider::after {
@@ -1204,21 +1206,24 @@ h1, h2, h3 {
 
 .delivery-bag {
     position: absolute;
-    top: -6px;
-    min-width: 86px;
-    max-width: 112px;
-    padding: 8px 8px 10px;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 100px;
+    max-width: 130px;
+    padding: 8px 10px 10px;
     border-radius: 16px;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 0 12px 24px rgba(23, 13, 45, 0.14);
-    border: 1px solid rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 12px 24px rgba(23, 13, 45, 0.18);
+    border: 2px solid rgba(255,255,255,0.85);
     backdrop-filter: blur(6px);
     color: #52355f;
     animation: bagFloat 1.3s ease-in-out infinite;
+    z-index: 5;
 }
 
-.delivery-bag-boy { right: 70%; }
-.delivery-bag-girl { left: 70%; }
+.delivery-bag-boy { left: 50%; }
+.delivery-bag-girl { left: 50%; }
 
 .delivery-bag-label {
     font-size: 0.56rem;
@@ -1240,12 +1245,12 @@ h1, h2, h3 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     border-radius: 9px;
     background: rgba(255,255,255,0.82);
     box-shadow: inset 0 -2px 0 rgba(0,0,0,0.05);
-    font-size: 0.95rem;
+    font-size: 1.1rem;
 }
 
 .delivery-narration {
@@ -1469,8 +1474,8 @@ h1, h2, h3 {
     .delivery-zone-label { font-size: 0.85rem; padding: 10px 16px; }
     .delivery-destination { width: 43%; padding-inline: 8px; }
     .delivery-destination-name { font-size: 0.76rem; }
-    .delivery-bag { min-width: 78px; max-width: 96px; }
-    .delivery-bag-items span { width: 20px; height: 20px; font-size: 0.85rem; }
+    .delivery-bag { min-width: 90px; max-width: 110px; }
+    .delivery-bag-items span { width: 22px; height: 22px; font-size: 1rem; }
     .delivery-narration-bubble { font-size: 0.9rem; }
     .delivery-punchline-headline { font-size: 1.65rem; }
 }
