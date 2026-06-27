@@ -263,13 +263,25 @@ function startShoppingCountdown() {
     );
 }
 
+// Per-player random item subsets (20 items each)
+const playerItemSets = {};
+
+function getPlayerItems(playerId) {
+    if (!playerItemSets[playerId]) {
+        const shuffled = [...BABY_ITEMS].sort(() => Math.random() - 0.5);
+        playerItemSets[playerId] = shuffled.slice(0, 20);
+    }
+    return playerItemSets[playerId];
+}
+
 function renderItemsGrid() {
     const grid = $('#items-grid');
     grid.innerHTML = '';
     const player = game.getCurrentPlayer();
     const playerPicks = game.picks[player.id];
+    const items = getPlayerItems(player.id);
 
-    BABY_ITEMS.forEach(item => {
+    items.forEach(item => {
         const card = document.createElement('div');
         card.className = 'item-card';
         if (playerPicks.includes(item.id)) {
