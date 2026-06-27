@@ -579,7 +579,6 @@ async function startDeliveryAnimation() {
     sparklesRight.classList.remove('is-bursting');
     sparklesLeft.classList.remove('is-bursting');
     usCaps.classList.remove('transforming');
-    rightNote.textContent = 'wait for it...';
 
     root.className = 'delivery-universe zone-city';
     flash.style.opacity = '0';
