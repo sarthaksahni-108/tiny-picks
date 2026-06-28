@@ -759,7 +759,7 @@ async function startDeliveryAnimation() {
     await Promise.all([sleep(520), triggerShake()]);
     if (!isActive()) return;
 
-    popNarration('Wait... 👀 who ELSE just became Mom & Dad?!');
+    popNarration('Umm.. wait.. why 2 deliveries though??!! 🤔');
     await sleep(3000);
     if (!isActive()) return;
 
