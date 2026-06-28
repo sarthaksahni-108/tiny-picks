@@ -126,13 +126,15 @@ function renderRoomPlayers(data) {
 
     Object.keys(players).forEach((pid, idx) => {
         const p = players[pid];
-        const player = CONFIG.players[p.playerIndex] || CONFIG.players[0];
+        const hasAvatar = p.playerIndex >= 0 && CONFIG.players[p.playerIndex];
+        const avatar = hasAvatar ? CONFIG.players[p.playerIndex].avatar : 'assets/avatars/friend-a.png';
+        const displayName = p.playerIndex >= 0 ? CONFIG.players[p.playerIndex].name : `Player ${idx + 1}`;
         const row = document.createElement('div');
         row.className = 'room-player-row';
         row.style.animationDelay = `${idx * 0.1}s`;
         row.innerHTML = `
-            <img src="${player.avatar}" alt="${p.name}">
-            <span class="room-player-name">${p.name}</span>
+            <img src="${avatar}" alt="${displayName}" onerror="this.style.display='none'">
+            <span class="room-player-name">${displayName}</span>
             <span class="room-player-badge">${pid === data.host ? '👑 Host' : '✅ Joined'}</span>
         `;
         list.appendChild(row);
@@ -157,6 +159,8 @@ $('#btn-start-game').addEventListener('click', async () => {
 // ========== SCREEN: Player Select (Claim & Ready) ==========
 let claimedPlayerIndex = null;
 let readyPlayers = new Set();
+let claimedByOthers = new Set(); // playerIndexes claimed by other devices
+let claimListenerUnsub = null;
 
 function renderPlayerGrid() {
     const grid = $('#player-grid');
@@ -166,10 +170,11 @@ function renderPlayerGrid() {
         card.className = 'player-card';
         
         const isClaimed = claimedPlayerIndex === index;
+        const isTakenByOther = claimedByOthers.has(index);
         const isDoneByOther = game.isPlayerDone(player.id) && !isClaimed;
         
         if (isClaimed) card.classList.add('claimed');
-        if (isDoneByOther) card.classList.add('done');
+        if (isTakenByOther || isDoneByOther) card.classList.add('done');
         
         card.innerHTML = `
             <div class="player-avatar">
@@ -177,13 +182,38 @@ function renderPlayerGrid() {
             </div>
             <div class="player-name">${player.name}</div>
             ${isClaimed ? '<div class="done-badge">That\'s me! ✋</div>' : ''}
+            ${isTakenByOther && !isClaimed ? '<div class="done-badge">Taken</div>' : ''}
         `;
         
-        // Only allow claiming if not yet claimed by this user
-        if (claimedPlayerIndex === null && !isDoneByOther) {
+        // Only allow claiming if not yet claimed by this user and not taken
+        if (claimedPlayerIndex === null && !isTakenByOther && !isDoneByOther) {
             card.addEventListener('click', () => claimPlayer(index));
         }
         grid.appendChild(card);
+    });
+
+    // Start listening for other claims in multiplayer (only once)
+    if (roomRef && !claimListenerUnsub) {
+        startClaimListener();
+    }
+}
+
+function startClaimListener() {
+    claimListenerUnsub = roomRef.onSnapshot((doc) => {
+        if (!doc.exists) return;
+        const data = doc.data();
+        const players = data.players || {};
+        const newClaimed = new Set();
+        Object.keys(players).forEach(pid => {
+            if (pid !== currentPlayerId && players[pid].playerIndex >= 0) {
+                newClaimed.add(players[pid].playerIndex);
+            }
+        });
+        // Only re-render if the set actually changed
+        if (newClaimed.size !== claimedByOthers.size || [...newClaimed].some(x => !claimedByOthers.has(x))) {
+            claimedByOthers = newClaimed;
+            renderPlayerGrid();
+        }
     });
 }
 
@@ -209,6 +239,9 @@ $('#btn-ready').addEventListener('click', () => {
     $('#btn-ready').classList.add('btn-hidden');
     $('#ready-text').textContent = '✅ You\'re ready! Waiting for others...';
     
+    // Stop claim listener
+    if (claimListenerUnsub) { claimListenerUnsub(); claimListenerUnsub = null; }
+    
     if (CONFIG.devMode) {
         // In dev mode, start immediately
         startShoppingCountdown();
@@ -225,12 +258,12 @@ $('#btn-ready').addEventListener('click', () => {
 function listenForAllReady() {
     listenToRoom((data) => {
         const players = data.players || {};
-        const playerIds = Object.keys(players);
-        const readyCount = playerIds.filter(id => players[id].ready).length;
+        const claimedIds = Object.keys(players).filter(id => players[id].playerIndex >= 0);
+        const readyCount = claimedIds.filter(id => players[id].ready).length;
         
-        $('#ready-text').textContent = `✅ ${readyCount}/${playerIds.length} ready...`;
+        $('#ready-text').textContent = `✅ ${readyCount}/${claimedIds.length} ready...`;
         
-        if (readyCount >= playerIds.length && playerIds.length >= 2) {
+        if (readyCount >= claimedIds.length && claimedIds.length >= 2) {
             stopListening();
             startShoppingCountdown();
         }

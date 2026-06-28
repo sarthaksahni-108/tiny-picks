@@ -61,9 +61,17 @@ async function createRoom() {
     await roomRef.set({
         host: currentPlayerId,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        status: 'waiting', // waiting for players to join
-        playerCount: 0,
-        players: {},
+        status: 'waiting',
+        playerCount: 1,
+        players: {
+            [currentPlayerId]: {
+                name: '👑 Host',
+                playerIndex: -1,
+                joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                ready: false,
+                done: false
+            }
+        },
         picks: {}
     });
 
@@ -87,23 +95,30 @@ async function joinRoom(code) {
         throw new Error('This room has already started the reveal!');
     }
 
+    // Register presence in the room
+    await roomRef.update({
+        [`players.${currentPlayerId}`]: {
+            name: 'Player',
+            playerIndex: -1,
+            joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            ready: false,
+            done: false
+        },
+        playerCount: firebase.firestore.FieldValue.increment(1)
+    });
+
     isHost = (data.host === currentPlayerId);
     return data;
 }
 
-// Register current player in the room
+// Register current player's claimed character in the room
 async function registerPlayer(playerIndex) {
     const player = CONFIG.players[playerIndex];
     
     await roomRef.update({
-        [`players.${currentPlayerId}`]: {
-            name: player.name,
-            playerIndex: playerIndex,
-            avatar: player.avatar,
-            joinedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            done: false
-        },
-        playerCount: firebase.firestore.FieldValue.increment(1)
+        [`players.${currentPlayerId}.name`]: player.name,
+        [`players.${currentPlayerId}.playerIndex`]: playerIndex,
+        [`players.${currentPlayerId}.avatar`]: player.avatar,
     });
 }
 
@@ -140,12 +155,12 @@ function stopListening() {
     }
 }
 
-// Check if all players are done picking
+// Check if all players who claimed a character are done picking
 function allPlayersDone(roomData) {
     const players = roomData.players || {};
-    const playerIds = Object.keys(players);
-    if (playerIds.length < 2) return false; // need at least 2 players
-    return playerIds.every(id => players[id].done === true);
+    const claimedPlayers = Object.keys(players).filter(id => players[id].playerIndex >= 0);
+    if (claimedPlayers.length < 2) return false; // need at least 2 active players
+    return claimedPlayers.every(id => players[id].done === true);
 }
 
 // Get all picks organized by player index
@@ -156,6 +171,7 @@ function getPicksByPlayer(roomData) {
 
     Object.keys(players).forEach(pid => {
         const playerIndex = players[pid].playerIndex;
+        if (playerIndex < 0 || !CONFIG.players[playerIndex]) return;
         const playerId = CONFIG.players[playerIndex].id;
         result[playerId] = picks[pid] || [];
     });
