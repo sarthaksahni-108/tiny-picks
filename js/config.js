@@ -2,7 +2,7 @@
 const CONFIG = {
     timerSeconds: 120,
     maxPicks: 5,
-    devMode: true, // Set to false for real game — skips "all players done" check
+    devMode: false, // LIVE MODE — full multiplayer flow
     
     // Players — replace avatar paths with actual headshots
     players: [
