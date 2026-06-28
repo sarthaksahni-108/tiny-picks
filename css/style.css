@@ -1863,3 +1863,15 @@ h1, h2, h3 {
     transition: background 0.3s;
 }
 .future-dots .dot.active { background: #6C63FF; }
+
+/* Reveal tagline */
+.reveal-tagline {
+    margin-top: 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #5a4a3f;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.5s forwards;
+}
